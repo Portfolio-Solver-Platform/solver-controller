@@ -1,0 +1,65 @@
+# image: "" # skaffold handles this name, since each profile needs different image names
+
+imagePullPolicy: IfNotPresent
+
+revisionHistoryLimit: 2
+
+
+updateStrategy:
+  type: RollingUpdate
+  maxUnavailable: 0
+  maxSurge: 1
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+
+service:
+  type: ClusterIP
+  portName: http
+  port: 8080
+  targetPort: 8080
+
+monitoringType: standard
+
+probes:
+  liveness:
+    path: /healthz
+    port: 8080
+    initialDelaySeconds: 30 
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    path: /readyz
+    port: 8080
+    initialDelaySeconds: 5
+    timeoutSeconds: 3
+    periodSeconds: 5
+    failureThreshold: 2
+
+
+pdb:
+  maxUnavailable: 1
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 10
+  averageUtilization: 70
