@@ -12,4 +12,3 @@ class Config:
         DESCRIPTION = "Manages solver and instances"
         VERSION = "v1"
         ROOT_PATH = "/"
-        

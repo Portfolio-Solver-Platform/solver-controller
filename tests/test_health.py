@@ -1,6 +1,3 @@
-from unittest.mock import Mock
-
-
 def test_health_endpoint(client):
     """Test the health endpoint"""
     response = client.get("/healthz")

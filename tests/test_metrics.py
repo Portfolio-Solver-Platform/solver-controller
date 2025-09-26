@@ -10,4 +10,3 @@ def test_metrics_endpoint(client):
     assert data.startswith("# HELP")
     # Should have both process and python data
     assert "python_" in data
-
