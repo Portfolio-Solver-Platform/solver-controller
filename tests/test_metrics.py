@@ -2,7 +2,10 @@ def test_metrics_endpoint(client):
     """Test the metrics endpoint"""
     response = client.get("/metrics")
     assert response.status_code == 200
-    data = response.data.decode("utf-8")
+    # Prometheus metrics are plain text
+    assert "text/plain" in response.headers["content-type"]
+
+    data = response.text
 
     assert data.startswith("# HELP")
     # Should have both process and python data

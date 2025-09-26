@@ -11,7 +11,7 @@ def test_health_endpoint(client):
 
 def test_ready_endpoint(client, monkeypatch):
     """Test the ready endpoint"""
-    fake_response = assume_keycloak_ready_state(monkeypatch, True)
+    # fake_response = assume_keycloak_ready_state(monkeypatch, True)
 
     response = client.get("/readyz")
     # fake_response.json.assert_called_once()
@@ -20,13 +20,13 @@ def test_ready_endpoint(client, monkeypatch):
     assert data["status"] == "ready"
 
 
-def assume_keycloak_ready_state(monkeypatch, is_ready: bool):
-    fake_response = Mock()
-    fake_response.json.return_value = {"status": "UP" if is_ready else "DOWN"}
+# def assume_keycloak_ready_state(monkeypatch, is_ready: bool):
+#     fake_response = Mock()
+#     fake_response.json.return_value = {"status": "UP" if is_ready else "DOWN"}
 
-    monkeypatch.setattr(
-        "src.blueprints.health.try_get_keycloak_ready_response",
-        lambda: fake_response,
-    )
+#     monkeypatch.setattr(
+#         "src.blueprints.health.try_get_keycloak_ready_response",
+#         lambda: fake_response,
+#     )
 
-    return fake_response
+#     return fake_response

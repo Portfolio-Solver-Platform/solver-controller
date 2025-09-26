@@ -2,15 +2,14 @@ import os
 
 
 class Config:
-    class Flask:
-        HOST = "127.0.0.1"
-        PORT = 5000
-        DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-
     class App:
         NAME = "solver-controller"
         VERSION = "0.1.0"
+        DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
     class Api:
+        TITLE = "Solver Controller API"
+        DESCRIPTION = "Manages solver and instances"
         VERSION = "v1"
-
+        ROOT_PATH = "/"
+        
