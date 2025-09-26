@@ -5,7 +5,7 @@ def test_health_endpoint(client):
     """Test the health endpoint"""
     response = client.get("/healthz")
     assert response.status_code == 200
-    data = response.get_json()
+    data = response.json()
     assert data["status"] == "ok"
 
 
@@ -16,7 +16,7 @@ def test_ready_endpoint(client, monkeypatch):
     response = client.get("/readyz")
     # fake_response.json.assert_called_once()
     assert response.status_code == 200
-    data = response.get_json()
+    data = response.json()
     assert data["status"] == "ready"
 
 
