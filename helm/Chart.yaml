@@ -1,0 +1,6 @@
+apiVersion: v2
+name: solver controller
+description: solver controller service that handles solvers.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
