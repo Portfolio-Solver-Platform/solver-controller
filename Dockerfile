@@ -13,10 +13,12 @@ COPY requirements-dev.txt .
 
 USER 10001
 ENV PATH="/home/appuser/.local/bin:${PATH}"
+RUN pip install --upgrade pip
 
 
 FROM base AS dev
 RUN pip install --no-cache-dir --user -r requirements-dev.txt
+COPY .trivyignore /
 COPY pyproject.toml .
 COPY src/ ./src/
 COPY tests/ ./tests/
@@ -26,6 +28,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "-k", "uvicorn.work
 
 FROM base AS runtime
 RUN pip install --no-cache-dir --user -r requirements.txt
+COPY .trivyignore /
 COPY pyproject.toml .
 COPY src/ ./src/
 EXPOSE 8080

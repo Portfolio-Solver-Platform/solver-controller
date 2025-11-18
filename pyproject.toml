@@ -2,10 +2,11 @@
 name = "solver-controller"
 version = "0.1.0"
 dependencies = [
-    "fastapi[standard]>=0.117.1,<0.118",
+    "fastapi[standard]>=0.120.0,<0.121",
     "prometheus-fastapi-instrumentator>=7.1.0,<8.0",
     "gunicorn>=23.0,<24.0",
-    "kubernetes>=33.0,<34.0"
+    "kubernetes>=34.1,<35.0",
+    "pika>=1.0,<2.0",
 ]
 
 [project.optional-dependencies]

@@ -12,3 +12,9 @@ class Config:
         DESCRIPTION = "Manages solver and instances"
         VERSION = "v1"
         ROOT_PATH = "/"
+
+    class RabbitMQ:
+        HOST = os.getenv("RABBITMQ_HOST", "rabbitmq.rabbit-mq.svc.cluster.local")
+        PORT = int(os.getenv("RABBITMQ_PORT", "5672"))
+        USER = os.getenv("RABBITMQ_USER", "guest")
+        PASSWORD = os.getenv("RABBITMQ_PASSWORD", "guest")

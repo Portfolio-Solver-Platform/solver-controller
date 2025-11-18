@@ -1,0 +1,2 @@
+# False positive: Google Auth library contains RSA key handling code, not actual keys
+secret:home/appuser/.local/lib/python3.13/site-packages/google/auth/crypt/__pycache__/_python_rsa.cpython-313.pyc
