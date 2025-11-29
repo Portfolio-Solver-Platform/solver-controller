@@ -21,7 +21,7 @@ class Config:
 
     class Solver:
         POD_MEMORY_REQUEST = 2
-        QUEUE_LENGTH_PER_REPLICA = int(float(os.getenv("KEDA_QUEUE_LENGTH", "1"))) 
+        QUEUE_LENGTH_PER_REPLICA = int(float(os.getenv("KEDA_QUEUE_LENGTH", "1")))
         MIN_REPLICAS = 0
         IMAGE = os.getenv("SOLVER_IMAGE")
         # TYPES = [s.strip() for s in os.getenv("SOLVER_TYPES", "chuffed").split(",") if s.strip()] # solver types from env vars, which is a comma-separated string

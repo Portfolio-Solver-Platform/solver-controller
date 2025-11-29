@@ -25,8 +25,7 @@ def deploy_solver(solver_type: str, solvers_namespace: str, project_id: str) -> 
     apps_v1 = client.AppsV1Api()
     try:
         apps_v1.create_namespaced_deployment(
-            namespace=solvers_namespace,
-            body=deployment_manifest
+            namespace=solvers_namespace, body=deployment_manifest
         )
         logger.info(f"✓ Created Deployment: solver-{solver_type}")
     except ApiException as e:
@@ -49,7 +48,7 @@ def deploy_solver(solver_type: str, solvers_namespace: str, project_id: str) -> 
             version="v1alpha1",
             namespace=solvers_namespace,
             plural="scaledobjects",
-            body=scaled_object_manifest
+            body=scaled_object_manifest,
         )
         logger.info(f"✓ Created ScaledObject: solver-{solver_type}-scaler")
         logger.info(f"  Queue: {queue_name}")

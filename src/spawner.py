@@ -1,5 +1,5 @@
 """Helper functions to create solver Deployments and KEDA ScaledObjects"""
-from kubernetes import client
+
 from src.config import Config
 
 
@@ -52,19 +52,31 @@ def create_solver_deployment_manifest(
                             "env": [
                                 {"name": "SOLVER_TYPE", "value": solver_type},
                                 {"name": "QUEUE_NAME", "value": queue_name},
-                                {"name": "RABBITMQ_HOST", "value": Config.RabbitMQ.HOST},
-                                {"name": "RABBITMQ_PORT", "value": str(Config.RabbitMQ.PORT)},
-                                {"name": "RABBITMQ_USER", "value": Config.RabbitMQ.USER},
-                                {"name": "RABBITMQ_PASSWORD", "value": Config.RabbitMQ.PASSWORD},
+                                {
+                                    "name": "RABBITMQ_HOST",
+                                    "value": Config.RabbitMQ.HOST,
+                                },
+                                {
+                                    "name": "RABBITMQ_PORT",
+                                    "value": str(Config.RabbitMQ.PORT),
+                                },
+                                {
+                                    "name": "RABBITMQ_USER",
+                                    "value": Config.RabbitMQ.USER,
+                                },
+                                {
+                                    "name": "RABBITMQ_PASSWORD",
+                                    "value": Config.RabbitMQ.PASSWORD,
+                                },
                             ],
                             "resources": {
                                 "requests": {
                                     "cpu": str(pod_cpu_request),
-                                    "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi"
+                                    "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi",
                                 },
                                 "limits": {
                                     "cpu": str(pod_cpu_request),
-                                    "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi"
+                                    "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi",
                                 },
                             },
                             "securityContext": {

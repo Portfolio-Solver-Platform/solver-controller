@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 import asyncio
 from .config import Config
 from .routers import health, version, api
-from .startup import deploy_all_solvers
 from .dispatcher import start_dispatcher
 import prometheus_fastapi_instrumentator
 

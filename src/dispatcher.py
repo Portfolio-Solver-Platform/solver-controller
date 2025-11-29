@@ -13,7 +13,6 @@ class InputSolveRequest:
     vcpus: int
 
 
-
 @dataclass
 class OutputSolveRequest:
     solver_id: int
@@ -25,8 +24,6 @@ class OutputSolveRequest:
 
 
 logger = logging.getLogger(__name__)
-
-
 
 
 async def start_dispatcher():
@@ -43,10 +40,9 @@ async def start_dispatcher():
         password=Config.RabbitMQ.PASSWORD,
     )
 
-
     async def process_message(message: aio_pika.IncomingMessage):
         async with message.process():
-            body = message.body.decode('utf-8')
+            body = message.body.decode("utf-8")
 
             solver_type = solver_types[0]
             solver_queue_name = f"project-{project_id}-solver-{solver_type}"
@@ -54,20 +50,19 @@ async def start_dispatcher():
             await channel.declare_queue(solver_queue_name, durable=True)
             await channel.default_exchange.publish(
                 aio_pika.Message(
-                    body=body.encode('utf-8'),
-                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+                    body=body.encode("utf-8"),
+                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
                 ),
                 routing_key=solver_queue_name,
             )
 
             logger.info(f"Routed message to {solver_queue_name}: {body}")
 
-    
-    async with connection:  
+    async with connection:
         channel = await connection.channel()
         queue = await channel.declare_queue(controller_queue, durable=True)
         exchange = channel.default_exchange
-        
+
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 async with message.process():
@@ -85,12 +80,11 @@ async def start_dispatcher():
 
                     for request in result.requests:
                         body = json.dumps(asdict(request)).encode()
-                        
+
                         await exchange.publish(
                             aio_pika.Message(
                                 body=body,
-                                delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+                                delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
                             ),
-                            routing_key=controller_queue
+                            routing_key=controller_queue,
                         )
-
