@@ -10,7 +10,7 @@ import prometheus_fastapi_instrumentator
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    deploy_all_solvers()
+    # deploy_all_solvers()
     asyncio.create_task(start_dispatcher())
     yield
 

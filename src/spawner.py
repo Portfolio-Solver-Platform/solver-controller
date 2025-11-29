@@ -8,6 +8,7 @@ def create_solver_deployment_manifest(
     solvers_namespace: str,
     solver_image: str,
     queue_name: str,
+    pod_cpu_request: int,
 ) -> dict:
     deployment_name = f"solver-{solver_type}"
 
@@ -58,11 +59,11 @@ def create_solver_deployment_manifest(
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": str(Config.Solver.POD_CPU_REQUEST),
+                                    "cpu": str(pod_cpu_request),
                                     "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi"
                                 },
                                 "limits": {
-                                    "cpu": str(Config.Solver.POD_CPU_REQUEST),
+                                    "cpu": str(pod_cpu_request),
                                     "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi"
                                 },
                             },

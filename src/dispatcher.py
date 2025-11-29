@@ -1,20 +1,40 @@
-"""Message dispatcher: consume from control queue and route to solver queues"""
+from dataclasses import asdict, dataclass
+import json
 import logging
 import aio_pika
 from src.config import Config
 
+
+@dataclass
+class InputSolveRequest:
+    problem_id: int
+    instance_id: int
+    solver_id: int
+    vcpus: int
+
+
+
+@dataclass
+class OutputSolveRequest:
+    solver_id: int
+    solver_name: str
+    problem_id: int
+    instance_id: int
+    problem_url: str
+    instance_url: str
+
+
 logger = logging.getLogger(__name__)
+
+
 
 
 async def start_dispatcher():
     project_id = Config.Controller.PROJECT_ID
-    control_queue = Config.Controller.CONTROL_QUEUE
+    controller_queue = Config.Controller.CONTROL_QUEUE
     solver_types = Config.Solver.TYPES
 
-    if not control_queue:
-        raise ValueError("CONTROL_QUEUE environment variable must be set")
-
-    logger.info(f"Starting dispatcher, listening to queue: {control_queue}")
+    logger.info(f"Starting dispatcher, listening to queue: {controller_queue}")
 
     connection = await aio_pika.connect_robust(
         host=Config.RabbitMQ.HOST,
@@ -23,10 +43,6 @@ async def start_dispatcher():
         password=Config.RabbitMQ.PASSWORD,
     )
 
-    channel = await connection.channel()
-    await channel.set_qos(prefetch_count=1)
-
-    queue = await channel.declare_queue(control_queue, durable=True)
 
     async def process_message(message: aio_pika.IncomingMessage):
         async with message.process():
@@ -46,5 +62,35 @@ async def start_dispatcher():
 
             logger.info(f"Routed message to {solver_queue_name}: {body}")
 
-    await queue.consume(process_message)
-    logger.info("Dispatcher ready, waiting for messages")
+    
+    async with connection:  
+        channel = await connection.channel()
+        queue = await channel.declare_queue(controller_queue, durable=True)
+        exchange = channel.default_exchange
+        
+        async with queue.iterator() as queue_iter:
+            async for message in queue_iter:
+                async with message.process():
+                    logger.info("Received request message")
+                    result_data = message.body.decode()
+                    result_json = json.loads(result_data)
+                    result = await process_message(result_json)
+                    response = OutputSolveRequest(
+                        project_id=project_id,
+                        solver_id=result_json["solver_id"],
+                        problem_id=result_json["problem_id"],
+                        instance_id=result_json["instance_id"],
+                    )
+                    response = asdict(response)
+
+                    for request in result.requests:
+                        body = json.dumps(asdict(request)).encode()
+                        
+                        await exchange.publish(
+                            aio_pika.Message(
+                                body=body,
+                                delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+                            ),
+                            routing_key=controller_queue
+                        )
+
