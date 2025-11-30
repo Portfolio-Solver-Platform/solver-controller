@@ -1,8 +1,10 @@
+from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import logging
 import aio_pika
 from src.config import Config
+import httpx
 
 
 @dataclass
@@ -11,6 +13,14 @@ class InputSolveRequest:
     instance_id: int
     solver_id: int
     vcpus: int
+
+    def from_dict(request: dict) -> InputSolveRequest:
+        return InputSolveRequest(
+            problem_id=request["problem_id"],
+            instance_id=request["instance_id"],
+            solver_id=request["solver_id"],
+            vcpus=request["vcpus"],
+        )
 
 
 @dataclass
@@ -27,9 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 async def start_dispatcher():
-    project_id = Config.Controller.PROJECT_ID
     controller_queue = Config.Controller.CONTROL_QUEUE
-    solver_types = Config.Solver.TYPES
 
     logger.info(f"Starting dispatcher, listening to queue: {controller_queue}")
 
@@ -40,51 +48,68 @@ async def start_dispatcher():
         password=Config.RabbitMQ.PASSWORD,
     )
 
-    async def process_message(message: aio_pika.IncomingMessage):
-        async with message.process():
-            body = message.body.decode("utf-8")
-
-            solver_type = solver_types[0]
-            solver_queue_name = f"project-{project_id}-solver-{solver_type}"
-
-            await channel.declare_queue(solver_queue_name, durable=True)
-            await channel.default_exchange.publish(
-                aio_pika.Message(
-                    body=body.encode("utf-8"),
-                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
-                ),
-                routing_key=solver_queue_name,
-            )
-
-            logger.info(f"Routed message to {solver_queue_name}: {body}")
-
     async with connection:
         channel = await connection.channel()
         queue = await channel.declare_queue(controller_queue, durable=True)
-        exchange = channel.default_exchange
 
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 async with message.process():
                     logger.info("Received request message")
                     result_data = message.body.decode()
-                    result_json = json.loads(result_data)
-                    result = await process_message(result_json)
-                    response = OutputSolveRequest(
-                        project_id=project_id,
-                        solver_id=result_json["solver_id"],
-                        problem_id=result_json["problem_id"],
-                        instance_id=result_json["instance_id"],
-                    )
-                    response = asdict(response)
+                    request = InputSolveRequest.from_dict(json.loads(result_data))
+                    await process_request(channel, request)
 
-                    for request in result.requests:
-                        body = json.dumps(asdict(request)).encode()
 
-                        await exchange.publish(
-                            aio_pika.Message(
-                                body=body,
-                                delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
-                            ),
-                            routing_key=controller_queue,
-                        )
+async def process_request(
+    channel: aio_pika.abc.AbstractRobustChannel, request: InputSolveRequest
+):
+    solver_request = OutputSolveRequest(
+        solver_id=request.solver_id,
+        solver_name=await get_solver_name(request.solver_id),
+        problem_id=request.problem_id,
+        instance_id=request.instance_id,
+        problem_url=problem_url(request.problem_id),
+        instance_url=instance_url(request.instance_id),
+    )
+    solver_request_body = json.dumps(asdict(solver_request)).encode()
+
+    queue_name = solver_queue_name(request.solver_id, request.vcpus)
+    await channel.declare_queue(queue_name, durable=True)
+    await channel.default_exchange.publish(
+        aio_pika.Message(
+            body=solver_request_body,
+            delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+        ),
+        routing_key=queue_name,
+    )
+
+    logger.info(f"Routed message to {queue_name}: {solver_request_body}")
+
+
+def solver_url(solver_id: int) -> str:
+    return f"{Config.SolverDirector.SOLVERS_URL}/{solver_id}"
+
+
+def problem_url(problem_id: int) -> str:
+    return f"{Config.SolverDirector.PROBLEMS_URL}/{problem_id}"
+
+
+def instance_url(instance_id: int) -> str:
+    return f"{Config.SolverDirector.INSTANCES_URL}/{instance_id}"
+
+
+async def make_get_request(url: str) -> httpx.Response:
+    timeout = httpx.Timeout(10.0, connect=5.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        return await client.get(url)
+
+
+async def get_solver_name(solver_id: int) -> str:
+    response = make_get_request(solver_url(solver_id))
+    response.raise_for_status()
+    return response.json()["name"]
+
+
+def solver_queue_name(solver_type: str, vcpus: int) -> str:
+    return f"project-{Config.Controller.PROJECT_ID}-solver-{solver_type}-vcpus-{vcpus}"

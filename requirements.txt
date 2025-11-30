@@ -65,6 +65,7 @@ httpx==0.28.1
     # via
     #   fastapi
     #   fastapi-cloud-cli
+    #   solver-controller (pyproject.toml)
 idna==3.11
     # via
     #   anyio

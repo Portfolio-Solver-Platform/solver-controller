@@ -81,6 +81,7 @@ httpx==0.28.1
     # via
     #   fastapi
     #   fastapi-cloud-cli
+    #   solver-controller (pyproject.toml)
 idna==3.11
     # via
     #   anyio
@@ -156,7 +157,7 @@ pygments==2.19.2
     #   rich
 pyparsing==3.2.5
     # via pip-requirements-parser
-pytest==8.4.2
+pytest==9.0.1
     # via
     #   pytest-cov
     #   solver-controller (pyproject.toml)
