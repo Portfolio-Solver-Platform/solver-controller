@@ -70,7 +70,6 @@ def create_solver_deployment_manifest(
                                 {"name": "QUEUE_IN_NAME", "value": queue_in_name},
                                 {"name": "QUEUE_OUT_NAME", "value": queue_out_name},
                                 {"name": "CPU_LIMIT", "value": str(pod_cpu_request)},
-
                             ],
                             "resources": {
                                 "requests": {
@@ -145,7 +144,7 @@ def create_keda_scaled_object_manifest(
                     "metadata": {
                         "value": "50"  # Keep pods if CPU usage > 50%
                     },
-                }
+                },
             ],
         },
     }

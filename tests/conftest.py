@@ -1,6 +1,7 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch
 
 # Set environment variables for tests before importing app
 os.environ.setdefault("RABBITMQ_HOST", "localhost")
@@ -13,7 +14,9 @@ os.environ.setdefault("SOLVERS_NAMESPACE", "test-namespace")
 os.environ.setdefault("CONTROL_QUEUE", "test-control-queue")
 os.environ.setdefault("MAX_TOTAL_SOLVER_REPLICAS", "10")
 
-from src.main import app
+# Mock kubernetes config loading for tests
+with patch("kubernetes.config.load_incluster_config"):
+    from src.main import app
 
 
 @pytest.fixture

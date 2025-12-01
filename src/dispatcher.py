@@ -68,8 +68,6 @@ async def start_dispatcher():
                     await process_request(channel, request)
 
 
-
-
 async def process_request(
     channel: aio_pika.abc.AbstractRobustChannel, request: InputSolveRequest
 ):
@@ -95,14 +93,23 @@ async def process_request(
     )
 
     logger.info(f"Routed message to {queue_name}: {solver_request_body}")
-    
-    deploy_solver(solver_name, solver_image_url, Config.Controller.SOLVERS_NAMESPACE, queue_name, Config.Controller.PROJECT_SOLVER_RESULT_QUEUE)
-    
+
+    deploy_solver(
+        solver_name,
+        solver_image_url,
+        Config.Controller.SOLVERS_NAMESPACE,
+        queue_name,
+        Config.Controller.PROJECT_SOLVER_RESULT_QUEUE,
+    )
 
 
-
-def deploy_solver(solver_type: str, solver_image_url: str, solvers_namespace: str, queue_in_name: str, queue_out_name: str) -> bool:
-
+def deploy_solver(
+    solver_type: str,
+    solver_image_url: str,
+    solvers_namespace: str,
+    queue_in_name: str,
+    queue_out_name: str,
+) -> bool:
     logger.info(f"Deploying solver: {solver_type} in namespace: {solvers_namespace}")
 
     deployment_manifest = create_solver_deployment_manifest(
@@ -162,7 +169,7 @@ def problem_url(problem_id: int) -> str:
     return f"{Config.SolverDirector.PROBLEMS_URL}/{problem_id}/file"
 
 
-def instance_url(problem_id: int,instance_id: int) -> str:
+def instance_url(problem_id: int, instance_id: int) -> str:
     return f"{Config.SolverDirector.PROBLEMS_URL}/{problem_id}/instances/{instance_id}/file"
 
 
@@ -181,4 +188,3 @@ async def get_solver_info(solver_id: int) -> tuple[str, str]:
 
 def solver_queue_name(solver_id: int, vcpus: int) -> str:
     return f"project-{Config.Controller.PROJECT_ID}-solver-{solver_id}-vcpus-{vcpus}"
-
