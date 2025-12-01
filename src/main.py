@@ -1,10 +1,21 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import asyncio
+import logging
+from kubernetes import config
 from .config import Config
 from .routers import health, version, api
 from .dispatcher import start_dispatcher
 import prometheus_fastapi_instrumentator
+
+config.load_incluster_config()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 
 @asynccontextmanager

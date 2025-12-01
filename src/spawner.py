@@ -7,8 +7,9 @@ def create_solver_deployment_manifest(
     solver_type: str,
     solvers_namespace: str,
     solver_image: str,
-    queue_name: str,
     pod_cpu_request: int,
+    queue_in_name: str,
+    queue_out_name: str,
 ) -> dict:
     deployment_name = f"solver-{solver_type}"
 
@@ -50,24 +51,26 @@ def create_solver_deployment_manifest(
                             "image": solver_image,
                             "imagePullPolicy": "IfNotPresent",
                             "env": [
-                                {"name": "SOLVER_TYPE", "value": solver_type},
-                                {"name": "QUEUE_NAME", "value": queue_name},
                                 {
-                                    "name": "RABBITMQ_HOST",
+                                    "name": "QUEUE_HOST",
                                     "value": Config.RabbitMQ.HOST,
                                 },
                                 {
-                                    "name": "RABBITMQ_PORT",
+                                    "name": "QUEUE_PORT",
                                     "value": str(Config.RabbitMQ.PORT),
                                 },
                                 {
-                                    "name": "RABBITMQ_USER",
+                                    "name": "QUEUE_USER",
                                     "value": Config.RabbitMQ.USER,
                                 },
                                 {
-                                    "name": "RABBITMQ_PASSWORD",
+                                    "name": "QUEUE_PASSWORD",
                                     "value": Config.RabbitMQ.PASSWORD,
                                 },
+                                {"name": "QUEUE_IN_NAME", "value": queue_in_name},
+                                {"name": "QUEUE_OUT_NAME", "value": queue_out_name},
+                                {"name": "CPU_LIMIT", "value": str(pod_cpu_request)},
+
                             ],
                             "resources": {
                                 "requests": {
@@ -79,12 +82,18 @@ def create_solver_deployment_manifest(
                                     "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi",
                                 },
                             },
+                            "volumeMounts": [
+                                {"name": "tmp", "mountPath": "/tmp"},
+                            ],
                             "securityContext": {
                                 "allowPrivilegeEscalation": False,
                                 "readOnlyRootFilesystem": True,
                                 "capabilities": {"drop": ["ALL"]},
                             },
                         }
+                    ],
+                    "volumes": [
+                        {"name": "tmp", "emptyDir": {}},
                     ],
                 },
             },
@@ -128,6 +137,13 @@ def create_keda_scaled_object_manifest(
                         "queueName": queue_name,
                         "mode": "QueueLength",
                         "value": str(Config.Solver.QUEUE_LENGTH_PER_REPLICA),
+                    },
+                },
+                {
+                    "type": "cpu",
+                    "metricType": "Utilization",
+                    "metadata": {
+                        "value": "50"  # Keep pods if CPU usage > 50%
                     },
                 }
             ],
