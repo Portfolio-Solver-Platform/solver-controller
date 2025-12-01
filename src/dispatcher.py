@@ -111,5 +111,5 @@ async def get_solver_name(solver_id: int) -> str:
     return response.json()["name"]
 
 
-def solver_queue_name(solver_type: str, vcpus: int) -> str:
-    return f"project-{Config.Controller.PROJECT_ID}-solver-{solver_type}-vcpus-{vcpus}"
+def solver_queue_name(solver_id: int, vcpus: int) -> str:
+    return f"project-{Config.Controller.PROJECT_ID}-solver-{solver_id}-vcpus-{vcpus}"
