@@ -1,7 +1,29 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+import asyncio
+import logging
+from kubernetes import config
 from .config import Config
 from .routers import health, version, api
+from .dispatcher import start_dispatcher
 import prometheus_fastapi_instrumentator
+
+config.load_incluster_config()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # deploy_all_solvers()
+    asyncio.create_task(start_dispatcher())
+    yield
+
 
 app = FastAPI(
     debug=Config.App.DEBUG,
@@ -9,6 +31,7 @@ app = FastAPI(
     title=Config.Api.TITLE,
     description=Config.Api.DESCRIPTION,
     version=Config.App.VERSION,
+    lifespan=lifespan,
 )
 
 
@@ -19,7 +42,7 @@ app.include_router(api.router, tags=["Api"], prefix=f"/{Config.Api.VERSION}")
 # Monitoring
 prometheus_fastapi_instrumentator.Instrumentator().instrument(app).expose(app)
 
-# Exclude /metrics from schema
+# Exclude /metrics from docs schema
 for route in app.routes:
     if route.path == "/metrics":
         route.include_in_schema = False

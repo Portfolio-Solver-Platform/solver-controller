@@ -14,7 +14,34 @@ class Config:
         ROOT_PATH = "/"
 
     class RabbitMQ:
-        HOST = os.getenv("RABBITMQ_HOST", "rabbitmq.rabbit-mq.svc.cluster.local")
-        PORT = int(os.getenv("RABBITMQ_PORT", "5672"))
-        USER = os.getenv("RABBITMQ_USER", "guest")
-        PASSWORD = os.getenv("RABBITMQ_PASSWORD", "guest")
+        HOST = os.getenv("RABBITMQ_HOST")
+        PORT = int(os.getenv("RABBITMQ_PORT"))
+        USER = os.getenv("RABBITMQ_USER")
+        PASSWORD = os.getenv("RABBITMQ_PASSWORD")
+
+    class Solver:
+        POD_MEMORY_REQUEST = 4
+        QUEUE_LENGTH_PER_REPLICA = int(float(os.getenv("KEDA_QUEUE_LENGTH", "1")))
+        MIN_REPLICAS = 0
+        IMAGE = os.getenv("SOLVER_IMAGE")
+
+    class SolverDirector:
+        SOLVERS_URL = os.getenv(
+            "SOLVER_DIRECTOR_SOLVERS_URL",
+            "http://solver-director.psp.svc.cluster.local:8080/v1/solvers",
+        )
+        PROBLEMS_URL = os.getenv(
+            "SOLVER_DIRECTOR_PROBLEMS_URL",
+            "http://solver-director.psp.svc.cluster.local:8080/v1/problems",
+        )
+        INSTANCES_URL = os.getenv(
+            "SOLVER_DIRECTOR_INSTANCES_URL",
+            "http://solver-director.psp.svc.cluster.local:8080/v1/instances",
+        )
+
+    class Controller:
+        PROJECT_ID = os.getenv("PROJECT_ID")
+        SOLVERS_NAMESPACE = os.getenv("SOLVERS_NAMESPACE")
+        CONTROL_QUEUE = os.getenv("CONTROL_QUEUE")
+        MAX_TOTAL_SOLVER_REPLICAS = int(float(os.getenv("MAX_TOTAL_SOLVER_REPLICAS")))
+        PROJECT_SOLVER_RESULT_QUEUE = os.getenv("PROJECT_SOLVER_RESULT_QUEUE")
