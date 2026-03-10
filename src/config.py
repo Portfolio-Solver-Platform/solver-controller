@@ -45,3 +45,4 @@ class Config:
         CONTROL_QUEUE = os.getenv("CONTROL_QUEUE")
         MAX_TOTAL_SOLVER_REPLICAS = int(float(os.getenv("MAX_TOTAL_SOLVER_REPLICAS")))
         PROJECT_SOLVER_RESULT_QUEUE = os.getenv("PROJECT_SOLVER_RESULT_QUEUE")
+        SOLVER_TIMEOUT = int(os.getenv("SOLVER_TIMEOUT"))
