@@ -16,6 +16,7 @@ class Config:
     class RabbitMQ:
         HOST = os.getenv("RABBITMQ_HOST")
         PORT = int(os.getenv("RABBITMQ_PORT"))
+        MANAGEMENT_PORT = 15672
         USER = os.getenv("RABBITMQ_USER")
         PASSWORD = os.getenv("RABBITMQ_PASSWORD")
 

@@ -135,7 +135,7 @@ def create_keda_scaled_object_manifest(
                 {
                     "type": "rabbitmq",
                     "metadata": {
-                        "host": f"amqp://{Config.RabbitMQ.USER}:{Config.RabbitMQ.PASSWORD}@{Config.RabbitMQ.HOST}:{Config.RabbitMQ.PORT}/",
+                        "host": f"http://{Config.RabbitMQ.USER}:{Config.RabbitMQ.PASSWORD}@{Config.RabbitMQ.HOST}:{Config.RabbitMQ.MANAGEMENT_PORT}/",
                         "queueName": queue_name,
                         "mode": "QueueLength",
                         "value": str(Config.Solver.QUEUE_LENGTH_PER_REPLICA),
