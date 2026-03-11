@@ -61,8 +61,10 @@ fastapi-cloud-cli==0.5.0
     # via fastapi-cli
 fastar==0.6.0
     # via fastapi-cloud-cli
-filelock==3.20.0
-    # via cachecontrol
+filelock==3.25.1
+    # via
+    #   cachecontrol
+    #   solver-controller (pyproject.toml)
 gunicorn==25.1.0
     # via solver-controller (pyproject.toml)
 h11==0.16.0
@@ -157,8 +159,10 @@ python-dateutil==2.9.0.post0
     # via kubernetes
 python-dotenv==1.2.1
     # via uvicorn
-python-multipart==0.0.20
-    # via fastapi
+python-multipart==0.0.22
+    # via
+    #   fastapi
+    #   solver-controller (pyproject.toml)
 pyyaml==6.0.3
     # via
     #   bandit
@@ -220,11 +224,12 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-urllib3==2.3.0
+urllib3==2.6.3
     # via
     #   kubernetes
     #   requests
     #   sentry-sdk
+    #   solver-controller (pyproject.toml)
 uvicorn==0.38.0
     # via
     #   fastapi
