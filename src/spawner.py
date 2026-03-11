@@ -85,7 +85,7 @@ def create_solver_deployment_manifest(
                                 },
                             },
                             "volumeMounts": [
-                                {"name": "tmp", "mountPath": "/tmp"},
+                                {"name": "tmp", "mountPath": "/tmp"},  # nosec B108
                             ],
                             "securityContext": {
                                 "allowPrivilegeEscalation": False,
