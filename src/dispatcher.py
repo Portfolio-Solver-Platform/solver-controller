@@ -100,6 +100,7 @@ async def process_request(
         Config.Controller.SOLVERS_NAMESPACE,
         queue_name,
         Config.Controller.PROJECT_SOLVER_RESULT_QUEUE,
+        Config.Controller.SOLVER_TIMEOUT,
     )
 
 
@@ -109,6 +110,7 @@ def deploy_solver(
     solvers_namespace: str,
     queue_in_name: str,
     queue_out_name: str,
+    solver_timeout: int,
 ) -> bool:
     logger.info(f"Deploying solver: {solver_type} in namespace: {solvers_namespace}")
 
@@ -119,6 +121,7 @@ def deploy_solver(
         pod_cpu_request=1,
         queue_in_name=queue_in_name,
         queue_out_name=queue_out_name,
+        solver_timeout=solver_timeout,
     )
 
     apps_v1 = client.AppsV1Api()

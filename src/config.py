@@ -16,6 +16,7 @@ class Config:
     class RabbitMQ:
         HOST = os.getenv("RABBITMQ_HOST")
         PORT = int(os.getenv("RABBITMQ_PORT"))
+        MANAGEMENT_PORT = 15672
         USER = os.getenv("RABBITMQ_USER")
         PASSWORD = os.getenv("RABBITMQ_PASSWORD")
 
@@ -45,3 +46,4 @@ class Config:
         CONTROL_QUEUE = os.getenv("CONTROL_QUEUE")
         MAX_TOTAL_SOLVER_REPLICAS = int(float(os.getenv("MAX_TOTAL_SOLVER_REPLICAS")))
         PROJECT_SOLVER_RESULT_QUEUE = os.getenv("PROJECT_SOLVER_RESULT_QUEUE")
+        SOLVER_TIMEOUT = int(os.getenv("SOLVER_TIMEOUT"))

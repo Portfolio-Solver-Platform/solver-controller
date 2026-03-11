@@ -10,6 +10,7 @@ def create_solver_deployment_manifest(
     pod_cpu_request: int,
     queue_in_name: str,
     queue_out_name: str,
+    solver_timeout: int,
 ) -> dict:
     deployment_name = f"solver-{solver_type}"
 
@@ -40,6 +41,7 @@ def create_solver_deployment_manifest(
                     }
                 },
                 "spec": {
+                    "terminationGracePeriodSeconds": solver_timeout + 60,
                     "imagePullSecrets": [{"name": "harbor-creds"}],
                     "securityContext": {
                         "runAsNonRoot": True,
@@ -70,6 +72,7 @@ def create_solver_deployment_manifest(
                                 {"name": "QUEUE_IN_NAME", "value": queue_in_name},
                                 {"name": "QUEUE_OUT_NAME", "value": queue_out_name},
                                 {"name": "CPU_LIMIT", "value": str(pod_cpu_request)},
+                                {"name": "SOLVER_TIMEOUT", "value": str(solver_timeout)},
                             ],
                             "resources": {
                                 "requests": {
@@ -82,7 +85,7 @@ def create_solver_deployment_manifest(
                                 },
                             },
                             "volumeMounts": [
-                                {"name": "tmp", "mountPath": "/tmp"},
+                                {"name": "tmp", "mountPath": "/tmp"},  # nosec B108
                             ],
                             "securityContext": {
                                 "allowPrivilegeEscalation": False,
@@ -132,17 +135,10 @@ def create_keda_scaled_object_manifest(
                 {
                     "type": "rabbitmq",
                     "metadata": {
-                        "host": f"amqp://{Config.RabbitMQ.USER}:{Config.RabbitMQ.PASSWORD}@{Config.RabbitMQ.HOST}:{Config.RabbitMQ.PORT}/",
+                        "host": f"http://{Config.RabbitMQ.USER}:{Config.RabbitMQ.PASSWORD}@{Config.RabbitMQ.HOST}:{Config.RabbitMQ.MANAGEMENT_PORT}/",
                         "queueName": queue_name,
                         "mode": "QueueLength",
                         "value": str(Config.Solver.QUEUE_LENGTH_PER_REPLICA),
-                    },
-                },
-                {
-                    "type": "cpu",
-                    "metricType": "Utilization",
-                    "metadata": {
-                        "value": "50"  # Keep pods if CPU usage > 50%
                     },
                 },
             ],

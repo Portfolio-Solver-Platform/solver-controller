@@ -1,2 +1,5 @@
+# No fix available yet in Debian 13.3 for glibc integer overflow (CVE-2026-0861)
+CVE-2026-0861
+
 # False positive: Google Auth library contains RSA key handling code, not actual keys
 secret:home/appuser/.local/lib/python3.13/site-packages/google/auth/crypt/__pycache__/_python_rsa.cpython-313.pyc

@@ -13,6 +13,8 @@ os.environ.setdefault("PROJECT_ID", "test-project")
 os.environ.setdefault("SOLVERS_NAMESPACE", "test-namespace")
 os.environ.setdefault("CONTROL_QUEUE", "test-control-queue")
 os.environ.setdefault("MAX_TOTAL_SOLVER_REPLICAS", "10")
+os.environ.setdefault("PROJECT_SOLVER_RESULT_QUEUE", "test-result-queue")
+os.environ.setdefault("SOLVER_TIMEOUT", "3600")
 
 # Mock kubernetes config loading for tests
 with patch("kubernetes.config.load_incluster_config"):
