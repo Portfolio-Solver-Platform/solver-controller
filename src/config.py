@@ -21,7 +21,6 @@ class Config:
         PASSWORD = os.getenv("RABBITMQ_PASSWORD")
 
     class Solver:
-        POD_MEMORY_REQUEST = 4
         QUEUE_LENGTH_PER_REPLICA = int(float(os.getenv("KEDA_QUEUE_LENGTH", "1")))
         MIN_REPLICAS = 0
         IMAGE = os.getenv("SOLVER_IMAGE")
