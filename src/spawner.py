@@ -8,6 +8,7 @@ def create_solver_deployment_manifest(
     solvers_namespace: str,
     solver_image: str,
     pod_cpu_request: int,
+    pod_memory_gib: float,
     queue_in_name: str,
     queue_out_name: str,
     solver_timeout: int,
@@ -72,16 +73,17 @@ def create_solver_deployment_manifest(
                                 {"name": "QUEUE_IN_NAME", "value": queue_in_name},
                                 {"name": "QUEUE_OUT_NAME", "value": queue_out_name},
                                 {"name": "CPU_LIMIT", "value": str(pod_cpu_request)},
+                                {"name": "MEMORY_LIMIT", "value": str(pod_memory_gib)},
                                 {"name": "SOLVER_TIMEOUT", "value": str(solver_timeout)},
                             ],
                             "resources": {
                                 "requests": {
                                     "cpu": str(pod_cpu_request),
-                                    "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi",
+                                    "memory": f"{pod_memory_gib}Gi",
                                 },
                                 "limits": {
                                     "cpu": str(pod_cpu_request),
-                                    "memory": f"{Config.Solver.POD_MEMORY_REQUEST}Gi",
+                                    "memory": f"{pod_memory_gib}Gi",
                                 },
                             },
                             "volumeMounts": [

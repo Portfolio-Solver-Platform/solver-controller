@@ -19,6 +19,7 @@ class InputSolveRequest:
     instance_id: int
     solver_id: int
     vcpus: int
+    memory_gib: float
 
     def from_dict(request: dict) -> InputSolveRequest:
         logger.info(f"request: {request}")
@@ -27,6 +28,7 @@ class InputSolveRequest:
             instance_id=request["instance_id"],
             solver_id=request["solver_id"],
             vcpus=request["vcpus"],
+            memory_gib=request["memory_gib"],
         )
 
 
@@ -101,6 +103,8 @@ async def process_request(
         queue_name,
         Config.Controller.PROJECT_SOLVER_RESULT_QUEUE,
         Config.Controller.SOLVER_TIMEOUT,
+        request.vcpus,
+        request.memory_gib,
     )
 
 
@@ -111,6 +115,8 @@ def deploy_solver(
     queue_in_name: str,
     queue_out_name: str,
     solver_timeout: int,
+    pod_cpu_request: int,
+    pod_memory_gib: float,
 ) -> bool:
     logger.info(f"Deploying solver: {solver_type} in namespace: {solvers_namespace}")
 
@@ -118,7 +124,8 @@ def deploy_solver(
         solver_type=solver_type,
         solvers_namespace=solvers_namespace,
         solver_image=solver_image_url,
-        pod_cpu_request=1,
+        pod_cpu_request=pod_cpu_request,
+        pod_memory_gib=pod_memory_gib,
         queue_in_name=queue_in_name,
         queue_out_name=queue_out_name,
         solver_timeout=solver_timeout,
