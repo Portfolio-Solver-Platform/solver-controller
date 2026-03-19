@@ -43,7 +43,6 @@ def create_solver_deployment_manifest(
                 },
                 "spec": {
                     "terminationGracePeriodSeconds": solver_timeout + 60,
-                    "imagePullSecrets": [{"name": "harbor-creds"}],
                     "securityContext": {
                         "runAsNonRoot": True,
                         "seccompProfile": {"type": "RuntimeDefault"},
