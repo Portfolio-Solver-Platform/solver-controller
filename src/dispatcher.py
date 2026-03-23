@@ -4,6 +4,7 @@ import json
 import logging
 import aio_pika
 from src.config import Config
+from src.queues import declare_quorum_queue, retry_or_dlq
 import httpx
 from kubernetes import client
 from kubernetes.client.rest import ApiException
@@ -59,15 +60,18 @@ async def start_dispatcher():
 
     async with connection:
         channel = await connection.channel()
-        queue = await channel.declare_queue(controller_queue, durable=True)
+        queue = await channel.declare_queue(controller_queue, durable=True, arguments={"x-queue-type": "quorum"})
 
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
-                async with message.process():
+                try:
                     logger.info("Received request message")
                     result_data = message.body.decode()
                     request = InputSolveRequest.from_dict(json.loads(result_data))
                     await process_request(channel, request)
+                    await message.ack()
+                except Exception as e:
+                    await retry_or_dlq(channel, controller_queue, message, e)
 
 
 async def process_request(
@@ -85,7 +89,7 @@ async def process_request(
     solver_request_body = json.dumps(asdict(solver_request)).encode()
 
     queue_name = solver_queue_name(request.solver_id, request.vcpus)
-    await channel.declare_queue(queue_name, durable=True)
+    await channel.declare_queue(queue_name, durable=True, arguments={"x-queue-type": "quorum"})
     await channel.default_exchange.publish(
         aio_pika.Message(
             body=solver_request_body,
