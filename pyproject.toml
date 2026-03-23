@@ -1,6 +1,7 @@
 [project]
 name = "solver-controller"
 version = "0.1.0"
+requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.120.0,<0.121",
     "prometheus-fastapi-instrumentator>=7.1.0,<8.0",
@@ -13,7 +14,7 @@ dependencies = [
     "urllib3>=2.6.3",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=9,<10",
     "pytest-cov>=7,<8",
