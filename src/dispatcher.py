@@ -4,7 +4,7 @@ import json
 import logging
 import aio_pika
 from src.config import Config
-from src.queues import declare_quorum_queue, retry_or_dlq
+from src.queues import retry_or_dlq
 import httpx
 from kubernetes import client
 from kubernetes.client.rest import ApiException
