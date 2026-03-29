@@ -3,7 +3,7 @@ name = "solver-controller"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi[standard]>=0.120.0,<0.121",
+    "fastapi[standard]>=0.135.2,<0.136",
     "prometheus-fastapi-instrumentator>=7.1.0,<8.0",
     "gunicorn>=25.0,<26.0",
     "kubernetes>=35.0,<36.0",
