@@ -74,6 +74,14 @@ def create_solver_deployment_manifest(
                                 {"name": "CPU_LIMIT", "value": str(pod_cpu_request)},
                                 {"name": "MEMORY_LIMIT", "value": str(pod_memory_gib)},
                                 {"name": "SOLVER_TIMEOUT", "value": str(solver_timeout)},
+                                {
+                                    "name": "KEYCLOAK_CLIENT_ID",
+                                    "valueFrom": {"secretKeyRef": {"name": "psp-auth-client", "key": "id"}},
+                                },
+                                {
+                                    "name": "KEYCLOAK_CLIENT_SECRET",
+                                    "valueFrom": {"secretKeyRef": {"name": "psp-auth-client", "key": "secret"}},
+                                },
                             ],
                             "resources": {
                                 "requests": {
