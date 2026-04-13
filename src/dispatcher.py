@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import logging
+import time
 import aio_pika
 from src.config import Config
 from src.queues import retry_or_dlq
@@ -187,10 +188,35 @@ def instance_url(problem_id: int, instance_id: int) -> str:
     return f"{Config.SolverDirector.PROBLEMS_URL}/{problem_id}/instances/{instance_id}/file"
 
 
+_token_cache: dict = {"token": None, "expires_at": 0.0}  # nosec B105
+
+
+async def _get_service_token() -> str:
+    if _token_cache["token"] and time.time() < _token_cache["expires_at"] - 15:
+        return _token_cache["token"]
+    timeout = httpx.Timeout(5.0, connect=2.0)
+    async with httpx.AsyncClient(timeout=timeout) as http:
+        r = await http.get(Config.Keycloak.WELL_KNOWN_URL)
+        r.raise_for_status()
+        token_endpoint = r.json()["token_endpoint"]
+        r = await http.post(token_endpoint, data={
+            "grant_type": "client_credentials",
+            "client_id": Config.Keycloak.CLIENT_ID,
+            "client_secret": Config.Keycloak.CLIENT_SECRET,
+            "scope": "solver-director:solvers:read",
+        })
+        r.raise_for_status()
+        data = r.json()
+        _token_cache["token"] = data["access_token"]
+        _token_cache["expires_at"] = time.time() + data.get("expires_in", 300)
+        return _token_cache["token"]
+
+
 async def make_get_request(url: str) -> httpx.Response:
+    token = await _get_service_token()
     timeout = httpx.Timeout(10.0, connect=5.0)
     async with httpx.AsyncClient(timeout=timeout) as client:
-        return await client.get(url)
+        return await client.get(url, headers={"Authorization": f"Bearer {token}"})
 
 
 async def get_solver_info(solver_id: int) -> tuple[str, str]:
