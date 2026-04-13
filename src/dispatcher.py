@@ -188,7 +188,7 @@ def instance_url(problem_id: int, instance_id: int) -> str:
     return f"{Config.SolverDirector.PROBLEMS_URL}/{problem_id}/instances/{instance_id}/file"
 
 
-_token_cache: dict = {"token": None, "expires_at": 0.0}
+_token_cache: dict = {"token": None, "expires_at": 0.0}  # nosec B105
 
 
 async def _get_service_token() -> str:
