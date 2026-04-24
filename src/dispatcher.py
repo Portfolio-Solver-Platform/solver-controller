@@ -13,6 +13,7 @@ from src.spawner import (
     create_solver_deployment_manifest,
     create_keda_scaled_object_manifest,
 )
+from src.poison_handler import ensure_dlq_consumer
 
 
 @dataclass
@@ -69,14 +70,16 @@ async def start_dispatcher():
                     logger.info("Received request message")
                     result_data = message.body.decode()
                     request = InputSolveRequest.from_dict(json.loads(result_data))
-                    await process_request(channel, request)
+                    await process_request(connection, channel, request)
                     await message.ack()
                 except Exception as e:
                     await retry_or_dlq(channel, controller_queue, message, e)
 
 
 async def process_request(
-    channel: aio_pika.abc.AbstractRobustChannel, request: InputSolveRequest
+    connection: aio_pika.abc.AbstractRobustConnection,
+    channel: aio_pika.abc.AbstractRobustChannel,
+    request: InputSolveRequest,
 ):
     solver_name, solver_image_url = await get_solver_info(request.solver_id)
     solver_request = OutputSolveRequest(
@@ -90,7 +93,23 @@ async def process_request(
     solver_request_body = json.dumps(asdict(solver_request)).encode()
 
     queue_name = solver_queue_name(request.solver_id, request.vcpus)
-    await channel.declare_queue(queue_name, durable=True, arguments={"x-queue-type": "quorum"})
+    await channel.declare_queue(
+        f"{queue_name}.dlq",
+        durable=True,
+        arguments={"x-queue-type": "quorum"},
+    )
+    await channel.declare_queue(
+        queue_name,
+        durable=True,
+        arguments={
+            "x-queue-type": "quorum",
+            "x-delivery-limit": 3,
+            "x-dead-letter-exchange": "",
+            "x-dead-letter-routing-key": f"{queue_name}.dlq",
+            "x-consumer-timeout": (Config.Controller.SOLVER_TIMEOUT + 60) * 1000,
+        },
+    )
+    ensure_dlq_consumer(connection, queue_name)
     await channel.default_exchange.publish(
         aio_pika.Message(
             body=solver_request_body,
