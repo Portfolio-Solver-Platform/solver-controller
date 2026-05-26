@@ -6,7 +6,7 @@ dependencies = [
     "fastapi[standard]>=0.120.0,<0.121",
     "prometheus-fastapi-instrumentator>=7.1.0,<8.0",
     "gunicorn>=25.0,<26.0",
-    "kubernetes>=35.0,<36.0",
+    "kubernetes>=36,<36.1",
     "aio-pika>=9.0,<10.0",
     "httpx>=0.28.1,<0.29.0",
     # Security: minimum versions required to satisfy vulnerability checks
